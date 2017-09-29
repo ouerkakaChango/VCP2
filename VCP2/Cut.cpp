@@ -130,8 +130,10 @@ namespace VCP {
 	}
 
 	void CutOutputCloud::TransToWorldCoo(const Vec4& objPos, const Vec4& objRot) {
+		//???
 		for (auto& iter : dataVec) {
-			iter.centerCPos = objPos - iter.centerCPos;
+			iter.centerCPos = objPos- GetRotMatrixByZ(objRot.z)*(GetRotMatrixByY(-objRot.y)*(GetRotMatrixByX(-objRot.x)*iter.centerCPos));
+
 			iter.rot = objRot-iter.rot;
 		}
 	}

@@ -55,6 +55,7 @@ int main()
 	//cout << "\ncloud init end.";
 	pipcloud.PumpStart();
 	
+
 	system("pause");
     return 0;
 }
