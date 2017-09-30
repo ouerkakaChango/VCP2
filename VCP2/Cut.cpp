@@ -107,8 +107,8 @@ namespace VCP {
 
 	void CutInputCloud::GenerateFuzzyCloud() {
 		//???
-		Vec4 ddrot = Vec4(10.0f, 10.0f, 10.0f);
 		Vec4 drot = Vec4(10.0f, 10.0f, 10.0f);
+		Vec4 ddrot = Vec4(1.0f, 1.0f, 1.0f);
 		Vec2 ds = Vec2(0.0f, 0.05f);
 		Vec2 dds = Vec2(0.0f, 0.01f);
 		for (Vec4 rot = baseData.rot - drot; !NearlyEqual(rot, baseData.rot + drot); rot += ddrot) {
@@ -132,7 +132,7 @@ namespace VCP {
 	void CutOutputCloud::TransToWorldCoo(const Vec4& objPos, const Vec4& objRot) {
 		//???
 		for (auto& iter : dataVec) {
-			iter.centerCPos = objPos- GetRotMatrixByZ(objRot.z)*(GetRotMatrixByY(-objRot.y)*(GetRotMatrixByX(-objRot.x)*iter.centerCPos));
+			iter.centerCPos = objPos- GetRotMatrixByZ(objRot.z+iter.rot.z)*(GetRotMatrixByY(-objRot.y + iter.rot.y)*(GetRotMatrixByX(-objRot.x + iter.rot.x)*iter.centerCPos));
 
 			iter.rot = objRot-iter.rot;
 		}
