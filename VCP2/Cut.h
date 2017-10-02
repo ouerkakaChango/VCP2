@@ -3,6 +3,8 @@
 #include "Math.h"
 #include "Pipe.h"
 #include "Cloud.h"
+#include <thread>
+using std::thread;
 namespace VCP {
 	class Cut{};
 
@@ -72,6 +74,7 @@ namespace VCP {
 
 	class CutPipeCloud :public PipeCloudBase {
 	public:
+		vector<thread> threadVec;
 		vector<CutPipe*> pipeVec;
 		CutOutputCloud outputCloud;
 		const CutInputCloud* inputCloud;

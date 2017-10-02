@@ -26,8 +26,6 @@ int main()
 	C_vec.Print();
 	*/
 
-	Vec4 M_vec(0, 0, 40), rot(0, 0, 0);
-	Vec2 s1(0.0f, -0.8f), s2(0.0f, 0.8f);
 	/*
 	Vec4 dvec = GetRotated(M_vec, rot);
 	//dvec.Print();
@@ -35,16 +33,16 @@ int main()
 	Vec4 C_vec = GetCPosBySpos(s1, CameraIns::TemCamera(), t1t2.x);
 	C_vec.Print();
 	*/
-	//////
-	
-	CutInputData input(M_vec,rot,s1,s2);
 
-	
 	//CutPipe pipe;
 	//pipe.InitInput(input);
 	//pipe.Assemble();
 	//pipe.PumpStart();
 	//pipe.PrintOutput();
+
+	Vec4 M_vec(0, 0, 180), rot(0, 0, 0);
+	Vec2 s1(0.0f, -0.5f), s2(0.0f, 0.5f);
+	CutInputData input(M_vec,rot,s1,s2);
 	
 	
 	CutInputCloud inputcloud(input);
@@ -52,9 +50,17 @@ int main()
 	cout <<"\n"<< inputcloud.dataVec.size();
 	//inputcloud.Print();
 	CutPipeCloud pipcloud(inputcloud);
-	//cout << "\ncloud init end.";
 	pipcloud.PumpStart();
 	
+	///
+	/*Vec4 M_vec2(0, 0, 180), rot2(0, 0, 45.0f);
+	Vec2 s12(0.5f, -0.5f), s22(0.5f, 0.5f);
+	CutInputData input2(M_vec2, rot2, s12, s22);
+	CutInputCloud inputcloud2(input2);
+	inputcloud2.GenerateFuzzyCloud();
+	cout << "\n" << inputcloud2.dataVec.size();
+	CutPipeCloud pipcloud2(inputcloud2);
+	pipcloud2.PumpStart();*/
 
 	system("pause");
     return 0;

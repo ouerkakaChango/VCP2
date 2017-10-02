@@ -109,8 +109,8 @@ namespace VCP {
 		//???
 		Vec4 drot = Vec4(10.0f, 10.0f, 10.0f);
 		Vec4 ddrot = Vec4(1.0f, 1.0f, 1.0f);
-		Vec2 ds = Vec2(0.0f, 0.05f);
-		Vec2 dds = Vec2(0.0f, 0.01f);
+		Vec2 ds = Vec2(0.0f, 0.3f);
+		Vec2 dds = Vec2(0.0f, 0.05f);
 		for (Vec4 rot = baseData.rot - drot; !NearlyEqual(rot, baseData.rot + drot); rot += ddrot) {
 			for (Vec2 s1 = baseData.s1 - ds; !NearlyEqual(s1, baseData.s1 + ds); s1 += dds) {
 				for (Vec2 s2 = baseData.s2 - ds; !NearlyEqual(s2, baseData.s2 + ds); s2 += dds) {
@@ -132,7 +132,7 @@ namespace VCP {
 	void CutOutputCloud::TransToWorldCoo(const Vec4& objPos, const Vec4& objRot) {
 		//???
 		for (auto& iter : dataVec) {
-			iter.centerCPos = objPos- GetRotMatrixByZ(objRot.z+iter.rot.z)*(GetRotMatrixByY(-objRot.y + iter.rot.y)*(GetRotMatrixByX(-objRot.x + iter.rot.x)*iter.centerCPos));
+			iter.centerCPos = objPos- GetRotMatrixByZ(objRot.z)*(GetRotMatrixByY(-objRot.y )*(GetRotMatrixByX(-objRot.x)*iter.centerCPos));
 
 			iter.rot = objRot-iter.rot;
 		}
@@ -166,8 +166,15 @@ namespace VCP {
 	}
 
 	void CutPipeCloud::PumpStart() {
-		for (auto& iter : pipeVec) {
+		//common mode
+		/*for (auto& iter : pipeVec) {
 			iter->PumpStart();
+		}*/
+
+		//muti-thread mode
+		for (int i = 0; i < pipeVec.size();i++) {
+			threadVec.push_back(thread(std::mem_fn(&CutPipe::PumpStart), pipeVec[i]));
+			threadVec[i].join();
 		}
 	}
 
@@ -196,6 +203,7 @@ namespace VCP {
 			outputCloud.dataVec[i].rot.Print();
 			cout<<"\n"<<inputCloud->rateVec[i];
 		}
+		//改动部分
 		outputCloud.TransToWorldCoo(Vec4(0, 0, 0), Vec4(0, 0, 0));
 		outputCloud.ToFile("D:\\VCP2.txt");
 	}
