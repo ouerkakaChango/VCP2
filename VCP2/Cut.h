@@ -4,7 +4,9 @@
 #include "Pipe.h"
 #include "Cloud.h"
 #include <thread>
+#include <set>
 using std::thread;
+using std::set;
 namespace VCP {
 	class Cut{};
 
@@ -25,12 +27,31 @@ namespace VCP {
 	public:
 		Vec4 centerCPos;
 		Vec4 rot;
+		CutOutPutData():
+			centerCPos(Vec4(-99.0f,-99.0f,-99.0f)),
+			rot(Vec4(-99.0f,-99.0f,-99.0f)){}
+
 		CutOutPutData(const Vec4& cpos,const Vec4& _rot) :
 			centerCPos(cpos) ,
 			rot(_rot){}
 
 		bool operator==(const CutOutPutData& v) const{
-			return centerCPos == v.centerCPos&&rot == v.rot;
+			return centerCPos == v.centerCPos&&rot==v.rot;
+		}
+
+		bool operator<(const CutOutPutData& v) const {
+			if (!(centerCPos == v.centerCPos)) {
+				return centerCPos < v.centerCPos;
+			}
+			else {
+				if (!(rot == v.rot)) {
+					return rot < v.rot;
+				}
+				else {
+					return false;
+				}
+			}
+			
 		}
 	};
 
@@ -82,6 +103,18 @@ namespace VCP {
 		virtual void PumpStart() override;
 		virtual void NotifyDone() override;
 		virtual void EndWork() override;
+	};
+
+	///
+
+	class CutCloudSet {
+	public:
+		vector<string> lineVec;
+		vector<float> rateVec;
+		//vector<CutOutPutData> outVec;
+		set<CutOutPutData> outSet;
+		void InitByFile(const string& path);
+		void Intersection(const CutCloudSet& set2);
 	};
 }
 #endif

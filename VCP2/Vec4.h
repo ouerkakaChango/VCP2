@@ -33,6 +33,25 @@ namespace VCP {
 			return NearlyEqualf(x, v.x) && NearlyEqualf(y, v.y) && NearlyEqualf(z, v.z);
 		}
 
+		bool operator<(const Vec4& v) const {
+			if (!NearlyEqualf(x, v.x)) {
+				return x < v.x;
+			}
+			else {
+				if (!NearlyEqualf(y, v.y)) {
+					return y < v.y;
+				}
+				else  {
+					if (!NearlyEqualf(z, v.z)) {
+						return z < v.z;
+					}
+					else {
+						return false;
+					}
+				}
+			}
+		}
+
 		float len() const {
 			return sqrtf(x*x + y*y + z*z);
 		}

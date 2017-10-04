@@ -2,6 +2,8 @@
 #include "TransFunction.h"
 #include "Utility.h"
 #include "VCPError.h"
+#include <algorithm>
+#include <iterator>
 namespace VCP {
 	
 
@@ -118,9 +120,9 @@ namespace VCP {
 					dataVec.push_back(CutInputData(baseData.localOffset, rot, s1, s2));
 					//...计算评分
 					float tem = 1 / 3.0 * (
-						(1.0f - (rot - baseData.rot).len() / (20 * sqrtf(3.0f))) +
-						(1.0f - (s2 - baseData.s2).len() / (0.1*sqrtf(2.0f))) +
-						(1.0f - (s1 - baseData.s1).len() / (0.1*sqrtf(2.0f)))
+						(1.0f - (rot - baseData.rot).len() / (10.0f * sqrtf(3.0f))) +
+						(1.0f - (s2 - baseData.s2).len() / (0.1f*sqrtf(2.0f))) +
+						(1.0f - (s1 - baseData.s1).len() / (0.1f*sqrtf(2.0f)))
 						);
 					rateVec.push_back(tem);
 				}
@@ -134,7 +136,7 @@ namespace VCP {
 		for (auto& iter : dataVec) {
 			iter.centerCPos = objPos- GetRotMatrixByZ(objRot.z)*(GetRotMatrixByY(-objRot.y )*(GetRotMatrixByX(-objRot.x)*iter.centerCPos));
 
-			iter.rot = objRot-iter.rot;
+			iter.rot = objRot;
 		}
 	}
 
@@ -143,7 +145,7 @@ namespace VCP {
 		outfile.open(path);
 		if (!outfile.is_open()) { throw VCPError("File open error"); }
 		else {
-			for (int i = 0; i < dataVec.size(); i++) {
+			for (int i = 0; i < (int)dataVec.size(); i++) {
 				outfile << dataVec[i].centerCPos.x << " " << dataVec[i].centerCPos.y << " " << dataVec[i].centerCPos.z << " " \
 					<< dataVec[i].rot.x << " " << dataVec[i].rot.y << " " << dataVec[i].rot.z << " " << inputCloud->rateVec[i]<<"\n";
 			}
@@ -172,7 +174,7 @@ namespace VCP {
 		}*/
 
 		//muti-thread mode
-		for (int i = 0; i < pipeVec.size();i++) {
+		for (int i = 0; i < (int)pipeVec.size();i++) {
 			threadVec.push_back(thread(std::mem_fn(&CutPipe::PumpStart), pipeVec[i]));
 			threadVec[i].join();
 		}
@@ -197,14 +199,84 @@ namespace VCP {
 			}
 		}
 		cout<< "\n======OutValueAdjustDONE======";
-		for (int i=0;i<outputCloud.dataVec.size();i++){
-			cout << "\n****************";
-			outputCloud.dataVec[i].centerCPos.Print();
-			outputCloud.dataVec[i].rot.Print();
-			cout<<"\n"<<inputCloud->rateVec[i];
-		}
 		//改动部分
 		outputCloud.TransToWorldCoo(Vec4(0, 0, 0), Vec4(0, 0, 0));
 		outputCloud.ToFile("D:\\VCP2.txt");
 	}
+
+	///
+
+	void CutCloudSet::InitByFile(const string& path) {
+		std::ifstream infile(path);
+		string temline;
+		if (infile) {
+			while (std::getline(infile, temline)) // line中不包括每行的换行符  
+			{
+				//cout << "\n" << temline;
+				lineVec.push_back(temline);
+			}
+		}
+		else {
+			throw VCPError("File read error.");
+		}
+
+		
+		int flag = 0;
+		string tem="";
+		float px, py, pz, rx, ry, rz;
+		float rate;
+
+		for (auto& line : lineVec) {
+			flag = 0;
+			for (int i = 0; i < (int)line.size(); i++) {
+				if (line[i] == ' ' || i == (line.size() - 1)) {
+					if (i == (line.size() - 1)) {
+						rate = stringToNum<float>(tem);
+					}
+					else if (flag == 0) {
+						px = stringToNum<float>(tem);
+					}
+					else if (flag == 1) {
+						py = stringToNum<float>(tem);
+					}
+					else if (flag == 2) {
+						pz = stringToNum<float>(tem);
+					}
+					else if (flag == 3) {
+						rx = stringToNum<float>(tem);
+					}
+					else if (flag == 4) {
+						ry = stringToNum<float>(tem);
+					}
+					else if (flag == 5) {
+						rz = stringToNum<float>(tem);
+					}
+					else {
+						throw VCPError("Flag error.");
+					}
+					tem = "";
+					flag++;
+				}
+				else {
+					tem += line[i];
+				}
+			}//for line
+			//outVec.push_back(CutOutPutData(Vec4(px,py,pz), Vec4(rx,ry,rz)));
+			outSet.insert(*(new CutOutPutData(Vec4(px, py, pz), Vec4(rx, ry, rz))));
+			rateVec.push_back(rate);
+		}
+		cout <<" " <<outSet.size() << " " << rateVec.size();
+	}//CutCloudSet::InitByFile end
+
+	void CutCloudSet::Intersection(const CutCloudSet& set2) {
+		set<CutOutPutData> i;
+		std::set_intersection(outSet.begin(), outSet.end(), set2.outSet.begin(), set2.outSet.end(), std::inserter(i, i.end()));
+		cout <<"\n" <<i.size();
+		for (auto& iter : i) {
+			cout << "\n*********";
+			iter.centerCPos.Print();
+			iter.rot.Print();
+		}
+	}
+
 }

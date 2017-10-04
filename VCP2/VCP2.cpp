@@ -40,17 +40,19 @@ int main()
 	//pipe.PumpStart();
 	//pipe.PrintOutput();
 
-	Vec4 M_vec(0, 0, 180), rot(0, 0, 0);
-	Vec2 s1(0.0f, -0.5f), s2(0.0f, 0.5f);
-	CutInputData input(M_vec,rot,s1,s2);
-	
-	
-	CutInputCloud inputcloud(input);
-	inputcloud.GenerateFuzzyCloud();
-	cout <<"\n"<< inputcloud.dataVec.size();
-	//inputcloud.Print();
-	CutPipeCloud pipcloud(inputcloud);
-	pipcloud.PumpStart();
+	////////////////////////
+
+	//Vec4 M_vec(0, 0, 180), rot(0, 0, 0);
+	//Vec2 s1(0.0f, -0.5f), s2(0.0f, 0.5f);
+	//CutInputData input(M_vec,rot,s1,s2);
+	//
+	//
+	//CutInputCloud inputcloud(input);
+	//inputcloud.GenerateFuzzyCloud();
+	//cout <<"\n"<< inputcloud.dataVec.size();
+	////inputcloud.Print();
+	//CutPipeCloud pipcloud(inputcloud);
+	//pipcloud.PumpStart();
 	
 	///
 	/*Vec4 M_vec2(0, 0, 180), rot2(0, 0, 45.0f);
@@ -62,6 +64,10 @@ int main()
 	CutPipeCloud pipcloud2(inputcloud2);
 	pipcloud2.PumpStart();*/
 
+	CutCloudSet set1,set2;
+	set1.InitByFile("D:\\VCP2.txt");
+	set2.InitByFile("D:\\VCP2_2.txt");
+	set1.Intersection(set2);
 	system("pause");
     return 0;
 }
