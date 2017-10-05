@@ -117,13 +117,14 @@ namespace VCP {
 			for (Vec2 s1 = baseData.s1 - ds; !NearlyEqual(s1, baseData.s1 + ds); s1 += dds) {
 				for (Vec2 s2 = baseData.s2 - ds; !NearlyEqual(s2, baseData.s2 + ds); s2 += dds) {
 					bool t= NearlyEqual(s2, baseData.s2 + ds);
-					dataVec.push_back(CutInputData(baseData.localOffset, rot, s1, s2));
+					
 					//...计算评分
 					float tem = 1 / 3.0 * (
 						(1.0f - (rot - baseData.rot).len() / (10.0f * sqrtf(3.0f))) +
 						(1.0f - (s2 - baseData.s2).len() / (0.1f*sqrtf(2.0f))) +
 						(1.0f - (s1 - baseData.s1).len() / (0.1f*sqrtf(2.0f)))
 						);
+					dataVec.push_back(CutInputData(baseData.localOffset, rot, s1, s2));
 					rateVec.push_back(tem);
 				}
 			}
@@ -140,14 +141,15 @@ namespace VCP {
 		}
 	}
 
-	void CutOutputCloud::ToFile(const string& path) {
+	void CutOutputCloud::SetRateAndToFile(const string& path) {
 		std::ofstream outfile;
 		outfile.open(path);
 		if (!outfile.is_open()) { throw VCPError("File open error"); }
 		else {
 			for (int i = 0; i < (int)dataVec.size(); i++) {
+				dataVec[i].rate = inputCloud->rateVec[i];
 				outfile << dataVec[i].centerCPos.x << " " << dataVec[i].centerCPos.y << " " << dataVec[i].centerCPos.z << " " \
-					<< dataVec[i].rot.x << " " << dataVec[i].rot.y << " " << dataVec[i].rot.z << " " << inputCloud->rateVec[i]<<"\n";
+					<< dataVec[i].rot.x << " " << dataVec[i].rot.y << " " << dataVec[i].rot.z << " " << dataVec[i] .rate<<"\n";
 			}
 		}
 		outfile.close();
@@ -201,7 +203,7 @@ namespace VCP {
 		cout<< "\n======OutValueAdjustDONE======";
 		//改动部分
 		outputCloud.TransToWorldCoo(Vec4(0, 0, 0), Vec4(0, 0, 0));
-		outputCloud.ToFile("D:\\VCP2.txt");
+		outputCloud.SetRateAndToFile("D:\\VCP3.txt");
 	}
 
 	///
@@ -262,21 +264,32 @@ namespace VCP {
 				}
 			}//for line
 			//outVec.push_back(CutOutPutData(Vec4(px,py,pz), Vec4(rx,ry,rz)));
-			outSet.insert(*(new CutOutPutData(Vec4(px, py, pz), Vec4(rx, ry, rz))));
-			rateVec.push_back(rate);
+			outSet.insert(*(new CutOutPutData(Vec4(px, py, pz), Vec4(rx, ry, rz),rate)));
 		}
-		cout <<" " <<outSet.size() << " " << rateVec.size();
+		cout << " " << outSet.size();
 	}//CutCloudSet::InitByFile end
 
-	void CutCloudSet::Intersection(const CutCloudSet& set2) {
-		set<CutOutPutData> i;
-		std::set_intersection(outSet.begin(), outSet.end(), set2.outSet.begin(), set2.outSet.end(), std::inserter(i, i.end()));
-		cout <<"\n" <<i.size();
-		for (auto& iter : i) {
+	void CutCloudSet::IntersectionAndToFile(const CutCloudSet& set2, const string& outpath) {
+		set<CutOutPutData> inter;
+		std::set_intersection(outSet.begin(), outSet.end(), set2.outSet.begin(), set2.outSet.end(), std::inserter(inter, inter.end()));
+		cout <<"\n" << inter.size();
+	/*	for (auto& iter : i) {
 			cout << "\n*********";
 			iter.centerCPos.Print();
 			iter.rot.Print();
+		}*/
+		std::ofstream outfile;
+		outfile.open(outpath);
+		if (!outfile.is_open()) { throw VCPError("File open error"); }
+		else {
+			for (auto& it:inter) {
+				outfile << it.centerCPos.x << " " << it.centerCPos.y << " " << it.centerCPos.z << " " << \
+					it.rot.x << " " << it.rot.y << " " << it.rot.z << " " << \
+					it.rate << "\n";
+				//这里的rate需要重新计算，比如取平均值，目前就先不计算了
+			}
 		}
-	}
+		outfile.close();
+	}//CutCloudSet::IntersectionAndToFile
 
 }

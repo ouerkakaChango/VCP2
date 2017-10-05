@@ -27,13 +27,12 @@ namespace VCP {
 	public:
 		Vec4 centerCPos;
 		Vec4 rot;
-		CutOutPutData():
-			centerCPos(Vec4(-99.0f,-99.0f,-99.0f)),
-			rot(Vec4(-99.0f,-99.0f,-99.0f)){}
+		float rate;
 
-		CutOutPutData(const Vec4& cpos,const Vec4& _rot) :
+		CutOutPutData(const Vec4& cpos = Vec4(-99.0f, -99.0f, -99.0f),const Vec4& _rot = Vec4(-99.0f, -99.0f, -99.0f),const float& _rate=-1.0f) :
 			centerCPos(cpos) ,
-			rot(_rot){}
+			rot(_rot),
+			rate(_rate){}
 
 		bool operator==(const CutOutPutData& v) const{
 			return centerCPos == v.centerCPos&&rot==v.rot;
@@ -48,7 +47,7 @@ namespace VCP {
 					return rot < v.rot;
 				}
 				else {
-					return false;
+					return rate<v.rate;
 				}
 			}
 			
@@ -68,8 +67,8 @@ namespace VCP {
 
 	class CutInputCloud :public InputCloudBase {
 	public:
-		vector<CutInputData> dataVec;
 		vector<float> rateVec;
+		vector<CutInputData> dataVec;
 		CutInputData baseData;
 		CutInputCloud(const CutInputData& _baseData) :
 			baseData(_baseData) {}
@@ -90,7 +89,7 @@ namespace VCP {
 		vector<CutOutPutData> dataVec;
 		const CutInputCloud* inputCloud;
 		void TransToWorldCoo(const Vec4& objPos, const Vec4& objRot);
-		virtual void ToFile(const string& path) override;
+		 void SetRateAndToFile(const string& path);
 	};
 
 	class CutPipeCloud :public PipeCloudBase {
@@ -110,11 +109,9 @@ namespace VCP {
 	class CutCloudSet {
 	public:
 		vector<string> lineVec;
-		vector<float> rateVec;
-		//vector<CutOutPutData> outVec;
 		set<CutOutPutData> outSet;
 		void InitByFile(const string& path);
-		void Intersection(const CutCloudSet& set2);
+		void IntersectionAndToFile(const CutCloudSet& set2,const string& outpath);
 	};
 }
 #endif

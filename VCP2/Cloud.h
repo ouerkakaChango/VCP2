@@ -11,7 +11,7 @@ namespace VCP {
 
 	class OutputCloudBase {
 	public:
-		virtual void ToFile(const string& path) = 0;
+		
 	};
 
 	class PipeCloudBase {
