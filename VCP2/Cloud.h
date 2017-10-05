@@ -6,7 +6,7 @@ namespace VCP {
 
 	class InputCloudBase {
 	public:
-		virtual void GenerateFuzzyCloud() = 0;
+		
 	};
 
 	class OutputCloudBase {

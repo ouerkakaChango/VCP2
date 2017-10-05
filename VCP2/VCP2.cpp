@@ -64,10 +64,19 @@ int main()
 	CutPipeCloud pipcloud2(inputcloud2);
 	pipcloud2.PumpStart();*/
 
-	CutCloudSet set1,set2;
+	/*CutCloudSet set1,set2;
 	set1.InitByFile("D:\\VCP2.txt");
 	set2.InitByFile("D:\\VCP2_2.txt");
-	set1.IntersectionAndToFile(set2,"D:\\Inter.txt");
+	set1.IntersectionAndToFile(set2,"D:\\Inter.txt");*/
+
+	Vec4 M_vec3(0, 0, 180), rot3(0, 0, 0.0f);
+	Vec2 s13(0.0f, -0.5f), s23(0.0f, 0.5f);
+	CutInputData input3(M_vec3, rot3, s13,s23);
+	CutInputCloud inputcloud3(input3);
+	inputcloud3.GenerateSurroundCloud();
+	cout << "\n" << inputcloud3.dataVec.size();
+	CutPipeCloud pipcloud3(inputcloud3);
+	pipcloud3.PumpStart();
 	system("pause");
     return 0;
 }

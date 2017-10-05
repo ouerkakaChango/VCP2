@@ -132,12 +132,20 @@ namespace VCP {
 
 	}
 
+	void CutInputCloud::GenerateSurroundCloud() {
+		Vec4 maxrot(0.0f, 0.0f, 359.0f);
+		for (Vec4 rot = baseData.rot; rot < maxrot; rot.z += 1.0f) {
+			dataVec.push_back(CutInputData(baseData.localOffset, rot, baseData.s1, baseData.s2));
+			rateVec.push_back(1.0f);
+		}
+	}
+
 	void CutOutputCloud::TransToWorldCoo(const Vec4& objPos, const Vec4& objRot) {
 		//???
 		for (auto& iter : dataVec) {
-			iter.centerCPos = objPos- GetRotMatrixByZ(objRot.z)*(GetRotMatrixByY(-objRot.y )*(GetRotMatrixByX(-objRot.x)*iter.centerCPos));
+			iter.centerCPos = objPos- GetRotMatrixByZ(objRot.z+iter.rot.z)*(GetRotMatrixByY(-objRot.y )*(GetRotMatrixByX(-objRot.x)*iter.centerCPos));
 
-			iter.rot = objRot;
+			//iter.rot = objRot;
 		}
 	}
 

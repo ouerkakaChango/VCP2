@@ -72,7 +72,8 @@ namespace VCP {
 		CutInputData baseData;
 		CutInputCloud(const CutInputData& _baseData) :
 			baseData(_baseData) {}
-		virtual void GenerateFuzzyCloud() override;
+		void GenerateFuzzyCloud();
+		void GenerateSurroundCloud();
 		void Print() const {
 			for (auto&i : dataVec) {
 				cout << "\n#########################"; 
