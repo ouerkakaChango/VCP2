@@ -241,6 +241,7 @@ namespace VCP {
 			for (int i = 0; i < (int)line.size(); i++) {
 				if (line[i] == ' ' || i == (line.size() - 1)) {
 					if (i == (line.size() - 1)) {
+						tem += line[i];
 						rate = stringToNum<float>(tem);
 					}
 					else if (flag == 0) {
