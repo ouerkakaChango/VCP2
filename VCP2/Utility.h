@@ -11,6 +11,8 @@ using std::string;
 using std::vector;
 using std::function;
 using std::cout;
+using std::ifstream;
+using std::ofstream;
 namespace VCP {
 	class Utility {};
 
@@ -22,6 +24,15 @@ Type stringToNum(const string& str) {
 	Type num;
 	iss >> num;
 	return num;
+}
+
+template <class Type>
+string numToString(const Type& n) {
+	std::stringstream ss;
+	std::string str;
+	ss << n;
+	ss >> str;
+	return str;
 }
 
 

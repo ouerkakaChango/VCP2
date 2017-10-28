@@ -72,8 +72,6 @@ namespace VCP {
 		CutInputData baseData;
 		CutInputCloud(const CutInputData& _baseData) :
 			baseData(_baseData) {}
-		void GenerateFuzzyCloud();
-		void GenerateSurroundCloud();
 		void Print() const {
 			for (auto&i : dataVec) {
 				cout << "\n#########################"; 
@@ -89,7 +87,8 @@ namespace VCP {
 	public:
 		vector<CutOutPutData> dataVec;
 		const CutInputCloud* inputCloud;
-		void TransToWorldCoo(const Vec4& objPos, const Vec4& objRot);
+		void TransToWorldCoo1(const Vec4& objPos, const Vec4& objRot);
+		void TransToWorldCoo2(const Vec4& objPos, const Vec4& objRot);
 		 void SetRateAndToFile(const string& path);
 	};
 
@@ -102,7 +101,6 @@ namespace VCP {
 		CutPipeCloud(const CutInputCloud& _inputCloud);
 		virtual void PumpStart() override;
 		virtual void NotifyDone() override;
-		virtual void EndWork() override;
 	};
 
 	///
@@ -111,7 +109,9 @@ namespace VCP {
 	public:
 		vector<string> lineVec;
 		set<CutOutPutData> outSet;
+		vector<CutOutPutData> outVec;
 		void InitByFile(const string& path);
+		void InitVecByFile(const string& path);
 		void IntersectionAndToFile(const CutCloudSet& set2,const string& outpath);
 	};
 }

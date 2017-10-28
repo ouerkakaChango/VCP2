@@ -107,43 +107,21 @@ namespace VCP {
 		startDataVec.push_back(PipeData("start", "s2", (void*)&input.s2));
 	}
 
-	void CutInputCloud::GenerateFuzzyCloud() {
+	void CutOutputCloud::TransToWorldCoo1(const Vec4& objPos, const Vec4& objRot) {
 		//???
-		Vec4 drot = Vec4(10.0f, 10.0f, 10.0f);
-		Vec4 ddrot = Vec4(1.0f, 1.0f, 1.0f);
-		Vec2 ds = Vec2(0.0f, 0.3f);
-		Vec2 dds = Vec2(0.0f, 0.05f);
-		for (Vec4 rot = baseData.rot - drot; !NearlyEqual(rot, baseData.rot + drot); rot += ddrot) {
-			for (Vec2 s1 = baseData.s1 - ds; !NearlyEqual(s1, baseData.s1 + ds); s1 += dds) {
-				for (Vec2 s2 = baseData.s2 - ds; !NearlyEqual(s2, baseData.s2 + ds); s2 += dds) {
-					bool t= NearlyEqual(s2, baseData.s2 + ds);
-					
-					//...计算评分
-					float tem = 1 / 3.0 * (
-						(1.0f - (rot - baseData.rot).len() / (10.0f * sqrtf(3.0f))) +
-						(1.0f - (s2 - baseData.s2).len() / (0.1f*sqrtf(2.0f))) +
-						(1.0f - (s1 - baseData.s1).len() / (0.1f*sqrtf(2.0f)))
-						);
-					dataVec.push_back(CutInputData(baseData.localOffset, rot, s1, s2));
-					rateVec.push_back(tem);
-				}
-			}
-		}
-
-	}
-
-	void CutInputCloud::GenerateSurroundCloud() {
-		Vec4 maxrot(0.0f, 0.0f, 359.0f);
-		for (Vec4 rot = baseData.rot; rot < maxrot; rot.z += 1.0f) {
-			dataVec.push_back(CutInputData(baseData.localOffset, rot, baseData.s1, baseData.s2));
-			rateVec.push_back(1.0f);
-		}
-	}
-
-	void CutOutputCloud::TransToWorldCoo(const Vec4& objPos, const Vec4& objRot) {
-		//???
+		//给静态Cut用的
 		for (auto& iter : dataVec) {
-			iter.centerCPos = objPos- GetRotMatrixByZ(objRot.z+iter.rot.z)*(GetRotMatrixByY(-objRot.y )*(GetRotMatrixByX(-objRot.x)*iter.centerCPos));
+			iter.centerCPos = objPos- GetRotMatrixByZ(objRot.z)*(GetRotMatrixByY(-objRot.y )*(GetRotMatrixByX(-objRot.x)*iter.centerCPos));
+
+			iter.rot = objRot;
+		}
+	}
+
+	void CutOutputCloud::TransToWorldCoo2(const Vec4& objPos, const Vec4& objRot) {
+		//???
+		//给环拍用的
+		for (auto& iter : dataVec) {
+			iter.centerCPos = objPos - GetRotMatrixByZ(objRot.z+iter.rot.z)*(GetRotMatrixByY(-objRot.y)*(GetRotMatrixByX(-objRot.x)*iter.centerCPos));
 
 			//iter.rot = objRot;
 		}
@@ -193,26 +171,26 @@ namespace VCP {
 	void CutPipeCloud::NotifyDone() {
 		nowDoneNum += 1;
 		if (nowDoneNum == pipeVec.size()) {
-			EndWork();
+			endFunction();
 		}
 	}
 
-	void CutPipeCloud::EndWork() {
-		cout << "\n======CalculationDONE======";
-		for (auto& pipeiter : pipeVec) {
-			Vec4* ori = (Vec4*)pipeiter->nodeVec.back()->outputDataVec[0].data;
-			Vec4 temcpos = Vec4((int)ori->x, (int)ori->y, (int)ori->z);
-			Vec4* temrot = (Vec4*)pipeiter->nodeVec[0]->inputDataVec[1].data;
-			CutOutPutData tem = CutOutPutData(temcpos, *temrot);
-			if (std::find(outputCloud.dataVec.begin(), outputCloud.dataVec.end(), tem) == outputCloud.dataVec.end()) {
-				outputCloud.dataVec.push_back(tem);
-			}
-		}
-		cout<< "\n======OutValueAdjustDONE======";
-		//改动部分
-		outputCloud.TransToWorldCoo(Vec4(0, 0, 0), Vec4(0, 0, 0));
-		outputCloud.SetRateAndToFile("D:\\VCP3.txt");
-	}
+	//void CutPipeCloud::EndWork() {
+	//	cout << "\n======CalculationDONE======";
+	//	for (auto& pipeiter : pipeVec) {
+	//		Vec4* ori = (Vec4*)pipeiter->nodeVec.back()->outputDataVec[0].data;
+	//		Vec4 temcpos = Vec4((int)ori->x, (int)ori->y, (int)ori->z);
+	//		Vec4* temrot = (Vec4*)pipeiter->nodeVec[0]->inputDataVec[1].data;
+	//		CutOutPutData tem = CutOutPutData(temcpos, *temrot);
+	//		if (std::find(outputCloud.dataVec.begin(), outputCloud.dataVec.end(), tem) == outputCloud.dataVec.end()) {
+	//			outputCloud.dataVec.push_back(tem);
+	//		}
+	//	}
+	//	cout<< "\n======OutValueAdjustDONE======";
+	//	//改动部分
+	//	outputCloud.TransToWorldCoo(Vec4(0, 0, 0), Vec4(0, 0, 0));
+	//	outputCloud.SetRateAndToFile("D:\\VCP3.txt");
+	//}
 
 	///
 
@@ -275,8 +253,72 @@ namespace VCP {
 			//outVec.push_back(CutOutPutData(Vec4(px,py,pz), Vec4(rx,ry,rz)));
 			outSet.insert(*(new CutOutPutData(Vec4(px, py, pz), Vec4(rx, ry, rz),rate)));
 		}
-		cout << " " << outSet.size();
+		cout << "\nSet size:" << outSet.size();
 	}//CutCloudSet::InitByFile end
+
+	void CutCloudSet::InitVecByFile(const string& path) {
+		std::ifstream infile(path);
+		string temline;
+		if (infile) {
+			while (std::getline(infile, temline)) // line中不包括每行的换行符  
+			{
+				//cout << "\n" << temline;
+				lineVec.push_back(temline);
+			}
+		}
+		else {
+			throw VCPError("File read error.");
+		}
+
+
+		int flag = 0;
+		string tem = "";
+		float px, py, pz, rx, ry, rz;
+		float rate;
+
+		for (auto& line : lineVec) {
+			flag = 0;
+			for (int i = 0; i < (int)line.size(); i++) {
+				if (line[i] == ' ' || i == (line.size() - 1)) {
+					if (i == (line.size() - 1)) {
+						tem += line[i];
+						rate = stringToNum<float>(tem);
+					}
+					else if (flag == 0) {
+						px = stringToNum<float>(tem);
+					}
+					else if (flag == 1) {
+						py = stringToNum<float>(tem);
+					}
+					else if (flag == 2) {
+						pz = stringToNum<float>(tem);
+					}
+					else if (flag == 3) {
+						rx = stringToNum<float>(tem);
+					}
+					else if (flag == 4) {
+						ry = stringToNum<float>(tem);
+					}
+					else if (flag == 5) {
+						rz = stringToNum<float>(tem);
+					}
+					else {
+						throw VCPError("Flag error.");
+					}
+					tem = "";
+					flag++;
+				}
+				else {
+					tem += line[i];
+				}
+			}//for line
+			 outVec.push_back(CutOutPutData(Vec4(px,py,pz), Vec4(rx,ry,rz),rate));
+			//outSet.insert(*(new CutOutPutData(Vec4(px, py, pz), Vec4(rx, ry, rz), rate)));
+		}
+		cout << "\nVec size:" << outVec.size();
+	}//CutCloudSet::InitVecByFile end
+
+
 
 	void CutCloudSet::IntersectionAndToFile(const CutCloudSet& set2, const string& outpath) {
 		set<CutOutPutData> inter;
@@ -295,6 +337,7 @@ namespace VCP {
 				outfile << it.centerCPos.x << " " << it.centerCPos.y << " " << it.centerCPos.z << " " << \
 					it.rot.x << " " << it.rot.y << " " << it.rot.z << " " << \
 					it.rate << "\n";
+				//???
 				//这里的rate需要重新计算，比如取平均值，目前就先不计算了
 			}
 		}
