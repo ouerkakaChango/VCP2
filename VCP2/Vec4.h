@@ -29,9 +29,19 @@ namespace VCP {
 			return *this;
 		}
 
+		//!!!without w
+		Vec4 operator*(float n) const{
+			return Vec4(x*n, y*n, z*n);
+		}
 		bool operator==(const Vec4& v) const{
 			return NearlyEqualf(x, v.x) && NearlyEqualf(y, v.y) && NearlyEqualf(z, v.z);
 		}
+
+		//!!!without w
+		Vec4  operator- (void)
+		{
+			return Vec4(-x,-y,-z);
+		};
 
 		bool operator<(const Vec4& v) const {
 			if (!NearlyEqualf(x, v.x)) {

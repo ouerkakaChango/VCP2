@@ -72,6 +72,7 @@ namespace VCP {
 		CutInputData baseData;
 		CutInputCloud(const CutInputData& _baseData) :
 			baseData(_baseData) {}
+		CutInputCloud():baseData(CutInputData(Vec4(999, 999, 999), Vec4(999, 999, 999), Vec2(99, 99), Vec2(99, 99))) {}
 		void Print() const {
 			for (auto&i : dataVec) {
 				cout << "\n#########################"; 
@@ -87,8 +88,10 @@ namespace VCP {
 	public:
 		vector<CutOutPutData> dataVec;
 		const CutInputCloud* inputCloud;
+		void TransToWorldCoo(const Coordinate3& objWorldCoo);
 		void TransToWorldCoo1(const Vec4& objPos, const Vec4& objRot);
 		void TransToWorldCoo2(const Vec4& objPos, const Vec4& objRot);
+		void TransToWorldCoo3();
 		 void SetRateAndToFile(const string& path);
 	};
 

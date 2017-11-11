@@ -3,6 +3,7 @@
 #include "Matrix4_4.h"
 #include "Vec2.h"
 #include "Vec4.h"
+#include "Coordinate3.h"
 #include <math.h>
 namespace VCP {
 #define XC_PI 3.1415926f
@@ -17,6 +18,7 @@ namespace VCP {
 	};
 
 	float DegreeToArc(float degree);
+	float ArcToDegree(float arc);
 };
 #endif
 

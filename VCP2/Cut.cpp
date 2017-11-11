@@ -107,24 +107,30 @@ namespace VCP {
 		startDataVec.push_back(PipeData("start", "s2", (void*)&input.s2));
 	}
 
-	void CutOutputCloud::TransToWorldCoo1(const Vec4& objPos, const Vec4& objRot) {
-		//???
-		//给静态Cut用的
+	void CutOutputCloud::TransToWorldCoo(const Coordinate3& objWorldCoo) {
+		Coordinate3 worldCoo(Vec4(0, 0, 0), Vec4(1, 0, 0), Vec4(0, 1, 0), Vec4(0, 0, 1));
 		for (auto& iter : dataVec) {
-			iter.centerCPos = objPos- GetRotMatrixByZ(objRot.z)*(GetRotMatrixByY(-objRot.y )*(GetRotMatrixByX(-objRot.x)*iter.centerCPos));
+			Coordinate3 cameraCooInObjCoo = RevertInfo(objWorldCoo, iter.centerCPos,iter.rot);
+			iter.centerCPos = CooTrans(worldCoo, objWorldCoo, cameraCooInObjCoo.origin);
+			iter.rot = GetWR(worldCoo, objWorldCoo, cameraCooInObjCoo);
 
-			iter.rot = objRot;
+			iter.centerCPos = Vec4((int)iter.centerCPos.x, (int)iter.centerCPos.y, (int)iter.centerCPos.z);
+			iter.rot = Vec4((int)iter.rot.x, (int)iter.rot.y, (int)iter.rot.z);
 		}
 	}
 
-	void CutOutputCloud::TransToWorldCoo2(const Vec4& objPos, const Vec4& objRot) {
-		//???
-		//给环拍用的
-		for (auto& iter : dataVec) {
-			iter.centerCPos = objPos - GetRotMatrixByZ(objRot.z+iter.rot.z)*(GetRotMatrixByY(-objRot.y)*(GetRotMatrixByX(-objRot.x)*iter.centerCPos));
 
-			//iter.rot = objRot;
+
+	
+
+	void CutOutputCloud::TransToWorldCoo3() {
+		//???
+		//给静跟
+		for (auto& iter : dataVec) {
+			//iter.centerCPos = objPos - GetRotMatrixByZ(objRot.z + iter.rot.z)*(GetRotMatrixByY(-objRot.y)*(GetRotMatrixByX(-objRot.x)*iter.centerCPos));
+			iter.rot.z = -90.0f+iter.rot.z;
 		}
+
 	}
 
 	void CutOutputCloud::SetRateAndToFile(const string& path) {

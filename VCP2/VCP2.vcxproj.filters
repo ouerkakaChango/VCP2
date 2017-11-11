@@ -33,9 +33,6 @@
     <ClInclude Include="Vec2.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ShootTarget.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="TransFunction.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -66,6 +63,9 @@
     <ClInclude Include="EnvironmentQuerySystem.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Coordinate3.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -81,9 +81,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Vec2.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ShootTarget.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="TransFunction.cpp">
@@ -114,6 +111,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="EnvironmentQuerySystem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Coordinate3.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

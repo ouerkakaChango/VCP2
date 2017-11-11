@@ -6,6 +6,7 @@
 #include "Math.h"
 #include "Cut.h"
 #include "EnvironmentQuerySystem.h"
+#include "TransFunction.h"
 #include <random>
 
 namespace VCP {
@@ -53,6 +54,11 @@ namespace VCP {
 					Vec4 M_vec(JGet("localOffset",0), JGet("localOffset", 1), JGet("localOffset", 2)),
 						rot(JGet("rot", 0), JGet("rot", 1), JGet("rot", 2));
 					Vec2 s1(JGet("s1", 0), JGet("s1", 1)), s2(JGet("s2", 0), JGet("s2", 1));
+
+					M_vec.Print();
+					rot.Print();
+					s1.Print();
+					s2.Print();
 					CutInputData input(M_vec,rot,s1,s2);
 					CutInputCloud inputcloud(input);
 	
@@ -108,8 +114,10 @@ namespace VCP {
 								}
 							}
 							//改动部分
-							pipcloud.outputCloud.TransToWorldCoo1( EQS.GetTargetPos(tparams["target"][Jint(i)].asInt()), EQS.GetTargetRot(tparams["target"][Jint(i)].asInt()));
+							//pipcloud.outputCloud.TransToWorldCoo1( EQS.GetTargetPos(tparams["target"][Jint(i)].asInt()), EQS.GetTargetRot(tparams["target"][Jint(i)].asInt()));
+							pipcloud.outputCloud.TransToWorldCoo(EQS.GetTargetCoordinate(tparams["target"][Jint(i)].asInt()));
 							pipcloud.outputCloud.SetRateAndToFile("D:\\VCP2\\VCP2outTest_"+numToString<int>(i)+".txt");
+
 					};
 					pipcloud.PumpStart();
 				}
@@ -159,6 +167,8 @@ namespace VCP {
 			}//Cut
 			else if (type == 1) {
 				//Surround
+				//???
+				//json中有把target改成多个的可能
 				cout << "\n########################################################";
 				cout << "\nSurround";
 				float x = tparams["localOffset"][Jint(0)][Jint(0)].asDouble();
@@ -166,10 +176,6 @@ namespace VCP {
 #define JVec2(name) Vec2(JGet(name,0),JGet(name,1))
 #define JVec4(name) Vec4(JGet(name,0),JGet(name,1),JGet(name,2))
 				CutInputData surroundInput(JVec4("localOffset"), JVec4("rot"),JVec2("s1"), JVec2("s2"));
-				/*surroundInput.localOffset.Print();
-				surroundInput.rot.Print();
-				surroundInput.s1.Print();
-				surroundInput.s2.Print();*/
 				CutInputCloud inputcloud(surroundInput);
 				
 				if (fuzzyMethod == 0) {
@@ -201,7 +207,9 @@ namespace VCP {
 						}
 					}
 					//改动部分
-					pipcloud.outputCloud.TransToWorldCoo2(EQS.GetTargetPos(tparams["target"][Jint(0)].asInt()), EQS.GetTargetRot(tparams["target"][Jint(0)].asInt()));
+					//???
+					//以后多target
+					pipcloud.outputCloud.TransToWorldCoo(EQS.GetTargetCoordinate(tparams["target"][Jint(0)].asInt()));
 					pipcloud.outputCloud.SetRateAndToFile(finalFilePath);
 				};
 				pipcloud.PumpStart();
@@ -220,6 +228,77 @@ namespace VCP {
 					ofile << numToString<int>(tf) << " " << numToString<int>(tdata.centerCPos.x) << " " << numToString<int>(tdata.centerCPos.y) << " " << numToString<int>(tdata.centerCPos.z) << \
 						" " << numToString<int>(tdata.rot.x) << " " << numToString<int>(tdata.rot.y) << " " << numToString<int>(tdata.rot.z) << "\n";
 				}
+				
+			}
+			else if (type == 2) {
+				cout << "\n########################################################";
+				cout << "\nStaticFollow";
+				//???
+				//json中有把target改成多个的可能
+				int targetID = tparams["target"][Jint(0)].asInt();
+#define JGet(name,index) tparams[name][Jint(0)][Jint(index)].asDouble()
+#define JVec2(name) Vec2(JGet(name,0),JGet(name,1))
+#define JVec4(name) Vec4(JGet(name,0),JGet(name,1),JGet(name,2))
+				Vec4 cameraWP=JVec4("staticCameraWP");
+				CutInputCloud inputcloud;
+				if (fuzzyMethod == 0) {
+					inputcloud.generateFuzzyCloudFunction = [&]() {
+						for (int i = startFrameID; i <= endFrameID; i++) {
+							//???
+							//有问题
+							//rot
+							Vec4 temCpos = cameraWP-EQS.GetTargetPos(targetID,i);//???
+							Vec4 temRot = Vec4(0, 0, -ArcToDegree(atan2(temCpos.x, temCpos.y)));
+							//temRot.Print();
+							//s1
+							Vec2 s1 = JVec2("s1");
+							//s2
+							Vec2 s2= GetScreenPos(CameraIns::TemCamera(), temCpos + JVec4("localOffset"));
+							inputcloud.dataVec.push_back(CutInputData(JVec4("localOffset"),temRot,s1,s2));
+							inputcloud.rateVec.push_back(1.0f);
+						}
+					};
+				}
+				else {
+					throw VCPError("FuzzyMethod error");
+				}
+				inputcloud.generateFuzzyCloudFunction();
+				/////////////////////////
+				string finalFilePath = "D:\\VCP2\\VCP2outTest_staticFollow.txt";
+				CutPipeCloud pipcloud(inputcloud);
+				pipcloud.endFunction = [&]() {
+					cout << "\n======PipeEnd======";
+					for (auto& pipeiter : pipcloud.pipeVec) {
+						Vec4* ori = (Vec4*)pipeiter->nodeVec.back()->outputDataVec[0].data;
+						Vec4 temcpos = Vec4((int)ori->x, (int)ori->y, (int)ori->z);
+						Vec4* temrot = (Vec4*)pipeiter->nodeVec[0]->inputDataVec[1].data;
+						CutOutPutData tem = CutOutPutData(temcpos, *temrot);
+						if (std::find(pipcloud.outputCloud.dataVec.begin(), pipcloud.outputCloud.dataVec.end(), tem) == pipcloud.outputCloud.dataVec.end()) {
+							pipcloud.outputCloud.dataVec.push_back(tem);
+						}
+					}
+					//改动部分
+					//???
+					pipcloud.outputCloud.TransToWorldCoo3();
+					pipcloud.outputCloud.SetRateAndToFile(finalFilePath);
+				};
+				pipcloud.PumpStart();
+
+				//???
+				//下面得pipecloud结束后才能调用，不能像现在直接顺序调用
+
+				//根据id,duration,fps,outFile生成最终序列帧
+				//???
+				//这里默认了duration*fps==tset.vec.size()
+				CutCloudSet tset;
+				/*tset.InitVecByFile(finalFilePath);
+
+				for (int tf = startFrameID; tf <= endFrameID; tf++) {
+					CutOutPutData tdata = tset.outVec[tf - startFrameID];
+					ofile << numToString<int>(tf) << " " << numToString<int>(tdata.centerCPos.x) << " " << numToString<int>(tdata.centerCPos.y) << " " << numToString<int>(tdata.centerCPos.z) << \
+						" " << numToString<int>(tdata.rot.x) << " " << numToString<int>(tdata.rot.y) << " " << numToString<int>(tdata.rot.z) << "\n";
+				}
+				*/
 				
 			}
 			else {

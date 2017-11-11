@@ -1,10 +1,7 @@
 #include <iostream>
-#include "Math.h"
-#include "ShootTarget.h"
-#include "Camera.h"
-#include "TransFunction.h"
-#include "Cut.h"
 #include "ShotScript.h"
+#include "EnvironmentQuerySystem.h"
+#include "TransFunction.h"
 using namespace VCP;
 using std::cout;
 int main()
@@ -82,8 +79,30 @@ int main()
 	CutPipeCloud pipcloud3(inputcloud3);
 	pipcloud3.PumpStart();*/
 
-	ShotScript script("D:\\VCP2\\script2.txt");
-
+	/////////////////////////////////////////////////////////////////////////
+	if (EQS.Init("D:\\VCP2\\storyScript1.txt")) {
+		ShotScript script("D:\\VCP2\\script2.txt");
+	}
+	else {
+		abort();
+	}
+	////////////////////////////////////////////////////////////////////////
+	/*auto s2 = GetScreenPos(CameraIns::TemCamera(), Vec4(320,0,-90)+Vec4(0,0,180));
+	s2.Print();
+	Vec4 dvec = GetRotated(Vec4(0, 0, 180), Vec4(0, 0, -63.435f));
+	Vec2 t1t2 = GetT1T2(dvec, Vec2(0, -0.5), Vec2(0, 0), CameraIns::TemCamera());
+	Vec4 C_vec = GetCPosBySpos(Vec2(0, -0.5), CameraIns::TemCamera(), t1t2.x);
+	C_vec.Print();*/
+	/////////////////////////////////////////////////////////////////////////
+	//Coordinate3 worldCoo(Vec4(0, 0, 0), Vec4(1, 0, 0), Vec4(0, 1, 0), Vec4(0, 0, 1));
+	////Coordinate3 ObjCoo(Vec4(1000, 0, 0), Vec4(-sqrt(3.0f) / 2.0f, 0, -1 / 2.0f), Vec4(0, -1, 0), Vec4(-1 / 2.0f, 0, sqrt(3.0f) / 2.0f));
+	//Coordinate3 ObjCoo(Vec4(1000, 0, 0), Vec4(-1,0,0), Vec4(0, -1, 0), Vec4(0,0,1));
+	//Coordinate3 cameraCooInObjCoo = RevertInfo(ObjCoo, Vec4(200, 50, -100), Vec4(0, 0, 0));
+	//Vec4 WP= CooTrans(worldCoo, ObjCoo, cameraCooInObjCoo.origin);
+	//WP.Print();
+	//Vec4 WR = GetWR(worldCoo, ObjCoo, cameraCooInObjCoo);
+	//WR.Print();
+	////////////////////////////////////////////////////////////////////////
 	system("pause");
     return 0;
 }
