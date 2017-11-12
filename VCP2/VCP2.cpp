@@ -81,18 +81,20 @@ int main()
 
 	/////////////////////////////////////////////////////////////////////////
 	if (EQS.Init("D:\\VCP2\\storyScript1.txt")) {
-		ShotScript script("D:\\VCP2\\script2.txt");
+		ShotScript script("D:\\VCP2\\script3.txt");
 	}
 	else {
 		abort();
 	}
 	////////////////////////////////////////////////////////////////////////
-	/*auto s2 = GetScreenPos(CameraIns::TemCamera(), Vec4(320,0,-90)+Vec4(0,0,180));
-	s2.Print();
-	Vec4 dvec = GetRotated(Vec4(0, 0, 180), Vec4(0, 0, -63.435f));
-	Vec2 t1t2 = GetT1T2(dvec, Vec2(0, -0.5), Vec2(0, 0), CameraIns::TemCamera());
-	Vec4 C_vec = GetCPosBySpos(Vec2(0, -0.5), CameraIns::TemCamera(), t1t2.x);
-	C_vec.Print();*/
+	//Vec4 M_vec(0, 0, 180), rot(0,0,0);
+	//Vec2 s1(0, -0.5f), s2(0, 0.5f);
+	//Vec4 dvec = GetRotated(M_vec, rot);
+	////dvec.Print();
+	//Vec2 t1t2 = GetT1T2(dvec, s1, s2, CameraIns::TemCamera());
+	//Vec4 C_vec = GetCPosBySpos(s1, CameraIns::TemCamera(), t1t2.x);
+	//C_vec.Print();
+	
 	/////////////////////////////////////////////////////////////////////////
 	//Coordinate3 worldCoo(Vec4(0, 0, 0), Vec4(1, 0, 0), Vec4(0, 1, 0), Vec4(0, 0, 1));
 	////Coordinate3 ObjCoo(Vec4(1000, 0, 0), Vec4(-sqrt(3.0f) / 2.0f, 0, -1 / 2.0f), Vec4(0, -1, 0), Vec4(-1 / 2.0f, 0, sqrt(3.0f) / 2.0f));

@@ -22,6 +22,7 @@ namespace VCP {
 		return Vec4(t, s1.x*camera.m_tan*t, s1.y/camera.ratio*camera.m_tan*t);
 	}
 
+	//???
 	Vec4 GetRotated(const Vec4& vec, const Vec4& rot) {
 		//return GetRotMatrixByZ(rot.z)*(GetRotMatrixByY(-rot.y)*(GetRotMatrixByX(-rot.x)*vec));
 		return vec;
@@ -137,4 +138,51 @@ namespace VCP {
 		return Vec4(a, b, c);
 	}
 
+	Vec4 GetEulerAngleWR0YZ(Vec4 vec) {
+
+		/*txdir.Print();
+		tydir.Print();
+		tzdir.Print();*/
+
+		Vec2 v1(0, 1);
+		Vec2 v2;
+		////roll=a
+		//v2.x = vec.y;
+		//v2.y = vec.z;
+		//float a = DegreeBetween(v1, v2);
+		//if (Cross(v2, v1) > 0.0f) {
+		//	//不变
+		//}
+		//else {
+		//	a = 360.0f - a;
+		//}
+
+		//pitch=b
+		v2.x = vec.x;
+		v2.y = vec.z;
+		float b = DegreeBetween(v1, v2);
+		if (Cross(v2, v1) < 0.0f) {
+			//不变
+		}
+		else {
+			b = 360.0f - b;
+		}
+
+		if (vec.x < 0) { b = 90.0f - b; }
+
+		//yaw=c
+		v2.x = vec.y;
+		v2.y = vec.x;
+		float c = DegreeBetween(v1, v2);
+		if (Cross(v2, v1) > 0.0f) {
+			//不变
+		}
+		else {
+			c = 360.0f - c;
+		}
+		//if (NearlyEqualf(a, 360.0f)) { a = 0.0f; }
+		if (NearlyEqualf(b, 360.0f)) { b = 0.0f; }
+		if (NearlyEqualf(c, 360.0f)) { c = 0.0f; }
+		return Vec4(0, b, c);
+	}
 }

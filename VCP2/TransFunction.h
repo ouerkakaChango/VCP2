@@ -16,6 +16,7 @@ namespace VCP {
 	Vec4 CooTrans(const Coordinate3& cbase, const Coordinate3& c2, Vec4 vecInC2);
 	Coordinate3 RevertInfo(Coordinate3 baseCoo, Vec4 pos, Vec4 rot);
 	Vec4 GetWR(Coordinate3 worldCoo, Coordinate3 ObjCoo, Coordinate3 cameraCooInObjCoo);
+	Vec4 GetEulerAngleWR0YZ(Vec4 vec);
 };
 #endif
 

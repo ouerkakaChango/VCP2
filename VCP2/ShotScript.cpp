@@ -240,50 +240,33 @@ namespace VCP {
 #define JVec2(name) Vec2(JGet(name,0),JGet(name,1))
 #define JVec4(name) Vec4(JGet(name,0),JGet(name,1),JGet(name,2))
 				Vec4 cameraWP=JVec4("staticCameraWP");
-				CutInputCloud inputcloud;
-				if (fuzzyMethod == 0) {
-					inputcloud.generateFuzzyCloudFunction = [&]() {
-						for (int i = startFrameID; i <= endFrameID; i++) {
-							//???
-							//有问题
-							//rot
-							Vec4 temCpos = cameraWP-EQS.GetTargetPos(targetID,i);//???
-							Vec4 temRot = Vec4(0, 0, -ArcToDegree(atan2(temCpos.x, temCpos.y)));
-							//temRot.Print();
-							//s1
-							Vec2 s1 = JVec2("s1");
-							//s2
-							Vec2 s2= GetScreenPos(CameraIns::TemCamera(), temCpos + JVec4("localOffset"));
-							inputcloud.dataVec.push_back(CutInputData(JVec4("localOffset"),temRot,s1,s2));
-							inputcloud.rateVec.push_back(1.0f);
-						}
-					};
-				}
-				else {
-					throw VCPError("FuzzyMethod error");
-				}
-				inputcloud.generateFuzzyCloudFunction();
-				/////////////////////////
+				Vec4 stareLocalOffset= JVec4("stareLocalOffset");
+				float rollWR = tparams["rollWR"].asDouble();
+				//???
+				//没有模糊，以后可能加
 				string finalFilePath = "D:\\VCP2\\VCP2outTest_staticFollow.txt";
-				CutPipeCloud pipcloud(inputcloud);
-				pipcloud.endFunction = [&]() {
-					cout << "\n======PipeEnd======";
-					for (auto& pipeiter : pipcloud.pipeVec) {
-						Vec4* ori = (Vec4*)pipeiter->nodeVec.back()->outputDataVec[0].data;
-						Vec4 temcpos = Vec4((int)ori->x, (int)ori->y, (int)ori->z);
-						Vec4* temrot = (Vec4*)pipeiter->nodeVec[0]->inputDataVec[1].data;
-						CutOutPutData tem = CutOutPutData(temcpos, *temrot);
-						if (std::find(pipcloud.outputCloud.dataVec.begin(), pipcloud.outputCloud.dataVec.end(), tem) == pipcloud.outputCloud.dataVec.end()) {
-							pipcloud.outputCloud.dataVec.push_back(tem);
+				//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				//根据盯点计算WR
+				//写入文件
+				{
+					std::ofstream outfile;
+					outfile.open(finalFilePath);
+					if (!outfile.is_open()) { throw VCPError("File open error"); }
+					else {
+						for (int tf = startFrameID; tf <= endFrameID; tf++) {
+							Vec4 temobjPos = EQS.GetTargetPos(targetID, tf);
+							Vec4 starePointWP = temobjPos + stareLocalOffset;
+							Vec4 lookAtVec = starePointWP - cameraWP;
+							Vec4 rot = GetEulerAngleWR0YZ(lookAtVec);
+							rot.x = rollWR;
+							outfile << cameraWP.x << " " << cameraWP.y << " " << cameraWP.z << " " \
+								<< rot.x << " " << rot.y << " " << rot.z << " " << 1.0 << "\n";
 						}
 					}
-					//改动部分
-					//???
-					pipcloud.outputCloud.TransToWorldCoo3();
-					pipcloud.outputCloud.SetRateAndToFile(finalFilePath);
-				};
-				pipcloud.PumpStart();
-
+					outfile.close();
+					cout << "\n======ToFileDONE======";
+				}
+				//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				//???
 				//下面得pipecloud结束后才能调用，不能像现在直接顺序调用
 
@@ -291,14 +274,14 @@ namespace VCP {
 				//???
 				//这里默认了duration*fps==tset.vec.size()
 				CutCloudSet tset;
-				/*tset.InitVecByFile(finalFilePath);
+				tset.InitVecByFile(finalFilePath);
 
 				for (int tf = startFrameID; tf <= endFrameID; tf++) {
 					CutOutPutData tdata = tset.outVec[tf - startFrameID];
 					ofile << numToString<int>(tf) << " " << numToString<int>(tdata.centerCPos.x) << " " << numToString<int>(tdata.centerCPos.y) << " " << numToString<int>(tdata.centerCPos.z) << \
 						" " << numToString<int>(tdata.rot.x) << " " << numToString<int>(tdata.rot.y) << " " << numToString<int>(tdata.rot.z) << "\n";
 				}
-				*/
+				
 				
 			}
 			else {

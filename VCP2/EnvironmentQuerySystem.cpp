@@ -44,18 +44,7 @@ namespace VCP {
 					frameObj = iter;
 				}
 			}
-			return Vec4(frameObj["pos"][Jint(0)].asDouble(), frameObj["pos"][Jint(1)].asDouble(), frameObj["pos"][Jint(2)].asDouble());
-		}
-	}
-
-	//???
-	Vec4 EnvironmentQuerySystem::GetTargetRot(int targetID) {
-		if (targetID == 0 || targetID == 1) {
-			return Vec4(0, 0, 0);
-		}
-		else {
-			//???
-			abort();
+			return Vec4(frameObj["origin"][Jint(0)].asDouble(), frameObj["origin"][Jint(1)].asDouble(), frameObj["origin"][Jint(2)].asDouble());
 		}
 	}
 
@@ -66,6 +55,26 @@ namespace VCP {
 		}
 		else if (targetID == 1) {
 			return Coordinate3(Vec4(0, 200, 0), Vec4(-1, 0, 0), Vec4(0, -1, 0), Vec4(0, 0, 1));
+		}
+
+		else {
+			auto targetObj = root["shotTargets"][Jint(0)];
+			for (auto& iter : root["shotTargets"]) {
+				if (iter["id"].asInt() == targetID) {
+					targetObj = iter;
+				}
+			}
+			auto frameObj = targetObj["record"][Jint(0)];
+			for (auto& iter : targetObj["record"]) {
+				if (iter["frameID"].asInt() == frameID) {
+					frameObj = iter;
+				}
+			}
+			Vec4 origin(frameObj["origin"][Jint(0)].asDouble(), frameObj["origin"][Jint(1)].asDouble(), frameObj["origin"][Jint(2)].asDouble());
+			Vec4 xdir(frameObj["xdir"][Jint(0)].asDouble(), frameObj["xdir"][Jint(1)].asDouble(), frameObj["xdir"][Jint(2)].asDouble());
+			Vec4 ydir(frameObj["ydir"][Jint(0)].asDouble(), frameObj["ydir"][Jint(1)].asDouble(), frameObj["ydir"][Jint(2)].asDouble());
+			Vec4 zdir(frameObj["zdir"][Jint(0)].asDouble(), frameObj["zdir"][Jint(1)].asDouble(), frameObj["zdir"][Jint(2)].asDouble());
+			return Coordinate3(origin, xdir, ydir, zdir);
 		}
 	}
 

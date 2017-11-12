@@ -12,7 +12,6 @@ namespace VCP {
 		static EnvironmentQuerySystem& GetInstance();
 		bool Init(const string& path);
 		Vec4 GetTargetPos(int targetID,int frameID=0);
-		Vec4 GetTargetRot(int targetID);
 		Coordinate3 GetTargetCoordinate(int targetID, int frameID=0);
 	};
 #define EQS EnvironmentQuerySystem::GetInstance()
